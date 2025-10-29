@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Set-Chair 3D Modelleri – Kerim Demiral</title>
+  <title>Set-Chair 3D Model Görüntüleme</title>
 
   <!-- Model Viewer -->
-  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
 
   <style>
     :root { color-scheme: dark; }
     body {
       font-family: system-ui, sans-serif;
-      background: #0f0f0f;
+      background: #0e0e0e;
       color: #fff;
       margin: 0;
       display: flex;
@@ -21,102 +21,146 @@
       text-align: center;
       overflow-x: hidden;
     }
+
     h1 {
-      margin-top: 20px;
+      margin-top: 18px;
       font-size: 22px;
-      font-weight: 600;
+      font-weight: 700;
       letter-spacing: 0.4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
+
+    h1::before {
+      content: "🪑";
+      font-size: 26px;
+    }
+
     .buttons {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
       justify-content: center;
-      margin: 15px 0 25px;
+      margin: 15px 0 20px;
     }
+
     button {
       background: #1a1a1a;
       border: 1px solid #333;
-      color: white;
+      color: #fff;
       border-radius: 10px;
-      padding: 10px 18px;
+      padding: 10px 16px;
       cursor: pointer;
       transition: 0.25s;
       font-size: 15px;
     }
-    button:hover {
+
+    button:hover,
+    button.active {
       background: #007bff;
       border-color: #007bff;
     }
+
     model-viewer {
       width: 92%;
       max-width: 800px;
       height: 420px;
       border-radius: 16px;
       background: #121212;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-      will-change: transform;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
       contain: layout paint;
     }
+
     .hint {
       opacity: 0.75;
       font-size: 14px;
-      margin: 15px 0 30px;
-      padding: 0 10px;
-      max-width: 90%;
+      margin: 15px 0 25px;
       line-height: 1.4;
+      max-width: 90%;
     }
 
-    /* Mobil cihazlarda sarsıntı önleme */
+    .ar-button {
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: 0.2s;
+    }
+
+    .ar-button:hover {
+      background: #0063d1;
+    }
+
     @media (max-width: 768px) {
-      model-viewer { height: 380px; }
+      model-viewer { height: 360px; }
+      h1 { font-size: 20px; }
     }
   </style>
 </head>
 <body>
-  <h1>🪑 Set-Chair 3D Modelleri</h1>
+  <h1>Set-Chair 3D Model Görüntüleme</h1>
 
   <div class="buttons">
-    <button onclick="show('Chair')">Chair</button>
+    <button onclick="show('Chair')" class="active">Chair</button>
     <button onclick="show('Chair1')">Chair 1</button>
     <button onclick="show('Chair2')">Chair 2</button>
   </div>
 
-  <model-viewer 
-    id="viewer"
+  <model-viewer id="viewer"
     camera-controls
-    interaction-prompt="none"
     ar
-    ar-modes="webxr scene-viewer quick-look"
-    shadow-intensity="1">
+    ar-scale="fixed"
+    disable-zoom
+    shadow-intensity="1"
+    interaction-prompt="none"
+    alt="3D model"
+    exposure="1">
   </model-viewer>
 
+  <button class="ar-button" id="arBtn">🕶️ Evinde Gör</button>
+
   <div class="hint">
-    Bilgisayarda modeli çevirebilir, mobilde <b>AR</b> butonuna tıklayarak gerçek ortamda görüntüleyebilirsiniz.
+    Bilgisayarda modeli döndürebilirsiniz.<br>
+    Mobilde <b>Evinde Gör</b> butonuna tıklayarak AR moduna geçebilirsiniz.
   </div>
 
   <script>
     const BASE = "https://cdn.jsdelivr.net/gh/kerimdmr/Set-Chair";
+
     const MODELS = {
-      "Chair":  { glb:`${BASE}/Chair/Chair.glb`,  usdz:`${BASE}/Chair/Chair.usdz` },
-      "Chair1": { glb:`${BASE}/Chair1/Chair1.glb`, usdz:`${BASE}/Chair1/Chair1.usdz` },
-      "Chair2": { glb:`${BASE}/Chair2/Chair2.glb`, usdz:`${BASE}/Chair2/Chair2.usdz` }
+      "Chair":  { glb:`${BASE}/Chair/Chair.glb`,  usdz:`${BASE}/Chair/Chair.usdz`,  poster:`${BASE}/Chair/Chair.jpg` },
+      "Chair1": { glb:`${BASE}/Chair1/Chair1.glb`, usdz:`${BASE}/Chair1/Chair1.usdz`, poster:`${BASE}/Chair1/Chair1.jpg` },
+      "Chair2": { glb:`${BASE}/Chair2/Chair2.glb`, usdz:`${BASE}/Chair2/Chair2.usdz`, poster:`${BASE}/Chair2/Chair2.jpg` }
     };
 
     const viewer = document.getElementById("viewer");
+    const arBtn = document.getElementById("arBtn");
+    const buttons = document.querySelectorAll(".buttons button");
 
-    function show(key) {
-      const model = MODELS[key];
-      if (!model) return;
+    function show(name) {
+      const m = MODELS[name];
+      if (!m) return;
+      buttons.forEach(b => b.classList.remove("active"));
+      document.querySelector(`button[onclick="show('${name}')"]`).classList.add("active");
 
-      // Model değiştirirken yeniden yükleme gecikmesini azalt
-      viewer.setAttribute("reveal", "interaction");
-      viewer.setAttribute("loading", "eager");
-      viewer.src = model.glb;
-      viewer.setAttribute("ios-src", model.usdz);
+      viewer.pause();
+      viewer.src = m.glb;
+      viewer.poster = m.poster;
+      viewer.setAttribute("ios-src", m.usdz);
+      viewer.dismissPoster();
     }
 
-    // Sayfa açıldığında varsayılan model
+    // "Evinde Gör" butonu AR modunu tetikler
+    arBtn.addEventListener("click", () => {
+      viewer.activateAR();
+    });
+
+    // Sayfa açıldığında ilk model
     show("Chair");
   </script>
 </body>
