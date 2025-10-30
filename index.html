@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Set-Chair AR Galeri</title>
+
+  <!-- Model Viewer -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
 
   <style>
@@ -13,72 +15,37 @@
       background: #0e0e0e;
       color: #fff;
       margin: 0;
+      padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px 0 60px;
     }
 
     h1 {
-      font-size: 30px;
-      margin-bottom: 20px;
+      font-size: 24px;
       font-weight: 700;
-      letter-spacing: 0.5px;
+      margin: 10px 0 30px;
     }
 
     .gallery {
       display: flex;
       flex-direction: column;
-      align-items: center;
       gap: 40px;
       width: 100%;
       max-width: 900px;
-    }
-
-    .model-card {
-      position: relative;
-      width: 90%;
-      background: #151515;
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+      align-items: center;
     }
 
     model-viewer {
-      width: 100%;
+      width: 90%;
       height: 400px;
-      background: #111;
+      background: #151515;
       border-radius: 20px;
-    }
-
-    .ar-btn {
-      position: absolute;
-      bottom: 15px;
-      right: 15px;
-      background: rgba(0,123,255,0.9);
-      border: none;
-      color: white;
-      font-size: 16px;
-      padding: 10px 14px;
-      border-radius: 50px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: 0.2s;
-    }
-
-    .ar-btn:hover {
-      background: #0063d1;
-    }
-
-    .ar-btn span {
-      font-size: 22px;
-      line-height: 1;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.5);
     }
 
     @media (max-width: 768px) {
-      model-viewer { height: 340px; }
+      model-viewer { height: 360px; }
     }
   </style>
 </head>
@@ -87,54 +54,28 @@
 
   <div class="gallery" id="gallery"></div>
 
-  <!-- iOS Quick Look için gizli link -->
-  <a id="iosARLink" rel="ar" href="" style="display:none;"></a>
-
   <script>
     const BASE = "https://cdn.jsdelivr.net/gh/kerimdmr/Set-Chair";
     const MODELS = [
-      { name: "Chair",  glb: `${BASE}/Chair/Chair.glb`,  usdz: `${BASE}/Chair/Chair.usdz` },
-      { name: "Chair1", glb: `${BASE}/Chair1/Chair1.glb`, usdz: `${BASE}/Chair1/Chair1.usdz` },
-      { name: "Chair2", glb: `${BASE}/Chair2/Chair2.glb`, usdz: `${BASE}/Chair2/Chair2.usdz` }
+      { glb: `${BASE}/Chair/Chair.glb`,  usdz: `${BASE}/Chair/Chair.usdz` },
+      { glb: `${BASE}/Chair1/Chair1.glb`, usdz: `${BASE}/Chair1/Chair1.usdz` },
+      { glb: `${BASE}/Chair2/Chair2.glb`, usdz: `${BASE}/Chair2/Chair2.usdz` }
     ];
 
     const gallery = document.getElementById("gallery");
-    const iosAR = document.getElementById("iosARLink");
-
-    function isIOS() {
-      return /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    }
 
     MODELS.forEach(model => {
-      const card = document.createElement("div");
-      card.className = "model-card";
-
       const viewer = document.createElement("model-viewer");
       viewer.setAttribute("src", model.glb);
       viewer.setAttribute("ios-src", model.usdz);
+      viewer.setAttribute("ar", "");
+      viewer.setAttribute("ar-scale", "fixed");
+      viewer.setAttribute("ar-modes", "scene-viewer quick-look webxr");
       viewer.setAttribute("camera-controls", "");
       viewer.setAttribute("shadow-intensity", "1");
       viewer.setAttribute("exposure", "1");
       viewer.setAttribute("interaction-prompt", "none");
-      viewer.setAttribute("ar", "");
-      viewer.setAttribute("ar-scale", "fixed");
-      viewer.setAttribute("ar-modes", "scene-viewer quick-look webxr");
-
-      const btn = document.createElement("button");
-      btn.className = "ar-btn";
-      btn.innerHTML = '<span></span> Evinde Gör';
-      btn.addEventListener("click", () => {
-        if (isIOS()) {
-          iosAR.href = model.usdz;
-          iosAR.click();
-        } else {
-          viewer.activateAR();
-        }
-      });
-
-      card.appendChild(viewer);
-      card.appendChild(btn);
-      gallery.appendChild(card);
+      gallery.appendChild(viewer);
     });
   </script>
 </body>
