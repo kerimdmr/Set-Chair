@@ -10,84 +10,16 @@
 
   <style>
     :root { color-scheme: dark; }
-    body {
-      font-family: system-ui, sans-serif;
-      background: #0e0e0e;
-      color: #fff;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      overflow-x: hidden;
-    }
-    h1 {
-      margin-top: 18px;
-      font-size: 22px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    h1::before {
-      content: "🪑";
-      font-size: 26px;
-    }
-    .buttons {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: center;
-      margin: 15px 0 20px;
-    }
-    button {
-      background: #1a1a1a;
-      border: 1px solid #333;
-      color: #fff;
-      border-radius: 10px;
-      padding: 10px 16px;
-      cursor: pointer;
-      transition: 0.25s;
-      font-size: 15px;
-    }
-    button:hover,
-    button.active {
-      background: #007bff;
-      border-color: #007bff;
-    }
-    model-viewer {
-      width: 92%;
-      max-width: 800px;
-      height: 420px;
-      border-radius: 16px;
-      background: #121212;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-    }
-    .hint {
-      opacity: 0.75;
-      font-size: 14px;
-      margin: 15px 0 25px;
-      line-height: 1.4;
-      max-width: 90%;
-    }
-    .ar-button {
-      background: #007bff;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      padding: 12px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      margin-top: 12px;
-      transition: 0.2s;
-    }
-    .ar-button:hover {
-      background: #0063d1;
-    }
-    @media (max-width: 768px) {
-      model-viewer { height: 360px; }
-      h1 { font-size: 20px; }
-    }
+    body{font-family:system-ui, sans-serif;background:#0e0e0e;color:#fff;margin:0;display:flex;flex-direction:column;align-items:center;text-align:center}
+    h1{margin:18px 0 10px;font-size:22px;font-weight:700}
+    .buttons{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:15px 0 20px}
+    button{background:#1a1a1a;border:1px solid #333;color:#fff;border-radius:10px;padding:10px 16px;cursor:pointer;transition:.25s;font-size:15px}
+    button:hover,button.active{background:#007bff;border-color:#007bff}
+    model-viewer{width:92%;max-width:800px;height:420px;border-radius:16px;background:#121212;box-shadow:0 0 20px rgba(0,0,0,.5)}
+    .ar-button{background:#007bff;color:#fff;border:none;border-radius:10px;padding:12px 20px;font-size:16px;cursor:pointer;margin-top:12px}
+    .hint{opacity:.75;font-size:14px;margin:14px 0 25px;line-height:1.4;max-width:90%}
+    @media (max-width:768px){model-viewer{height:360px}}
+    a#iosARLink{display:none} /* iOS için gizli Quick Look linki */
   </style>
 </head>
 <body>
@@ -102,24 +34,26 @@
   <model-viewer id="viewer"
     camera-controls
     ar
+    ar-modes="scene-viewer quick-look webxr"
     ar-scale="fixed"
-    disable-zoom
-    shadow-intensity="1"
     interaction-prompt="none"
-    alt="3D model"
-    exposure="1">
+    shadow-intensity="1"
+    crossorigin="anonymous"
+    alt="3D model">
   </model-viewer>
+
+  <!-- iOS Quick Look için gizli link -->
+  <a id="iosARLink" rel="ar" href=""></a>
 
   <button class="ar-button" id="arBtn">🕶️ Evinde Gör</button>
 
   <div class="hint">
-    Bilgisayarda modeli döndürebilirsiniz.<br>
-    Mobilde <b>Evinde Gör</b> butonuna tıklayarak AR moduna geçebilirsiniz.
+    Bilgisayarda modeli döndürebilirsiniz. Mobilde <b>Evinde Gör</b> butonuna tıklayarak AR moduna geçin.
+    <br><small>⚠️ Linki WhatsApp içinden değil, Safari/Chrome’da açın.</small>
   </div>
 
   <script>
     const BASE = "https://cdn.jsdelivr.net/gh/kerimdmr/Set-Chair";
-
     const MODELS = {
       "Chair":  { glb:`${BASE}/Chair/Chair.glb`,  usdz:`${BASE}/Chair/Chair.usdz`,  poster:`${BASE}/Chair/Chair.jpg` },
       "Chair1": { glb:`${BASE}/Chair1/Chair1.glb`, usdz:`${BASE}/Chair1/Chair1.usdz`, poster:`${BASE}/Chair1/Chair1.jpg` },
@@ -127,23 +61,41 @@
     };
 
     const viewer = document.getElementById("viewer");
-    const arBtn = document.getElementById("arBtn");
-    const buttons = document.querySelectorAll(".buttons button");
+    const arBtn  = document.getElementById("arBtn");
+    const iosAR  = document.getElementById("iosARLink");
+    const buttons= document.querySelectorAll(".buttons button");
 
-    function show(name) {
+    let currentKey = "Chair";
+
+    function isIOS(){
+      return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    }
+
+    function show(name){
+      currentKey = name;
       const m = MODELS[name];
-      if (!m) return;
+      if(!m) return;
       buttons.forEach(b => b.classList.remove("active"));
       document.querySelector(`button[onclick="show('${name}')"]`).classList.add("active");
 
-      viewer.pause();
       viewer.poster = m.poster;
-      viewer.src = m.glb;
+      viewer.src    = m.glb;
       viewer.setAttribute("ios-src", m.usdz);
-      viewer.dismissPoster();
+
+      // iOS için Quick Look linkini hazırla
+      iosAR.href = m.usdz;
     }
 
-    arBtn.addEventListener("click", () => viewer.activateAR());
+    // AR butonu: iOS’ta gizli rel="ar" linkine tıkla; Android’de model-viewer AR
+    arBtn.addEventListener("click", () => {
+      if (isIOS()) {
+        iosAR.click();       // Quick Look
+      } else {
+        viewer.activateAR(); // Scene Viewer / WebXR
+      }
+    });
+
+    // İlk model
     show("Chair");
   </script>
 </body>
