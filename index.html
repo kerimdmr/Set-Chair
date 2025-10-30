@@ -2,101 +2,140 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Set-Chair 3D Model Görüntüleme</title>
-
-  <!-- Model Viewer -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Set-Chair AR Galeri</title>
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
 
   <style>
     :root { color-scheme: dark; }
-    body{font-family:system-ui, sans-serif;background:#0e0e0e;color:#fff;margin:0;display:flex;flex-direction:column;align-items:center;text-align:center}
-    h1{margin:18px 0 10px;font-size:22px;font-weight:700}
-    .buttons{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:15px 0 20px}
-    button{background:#1a1a1a;border:1px solid #333;color:#fff;border-radius:10px;padding:10px 16px;cursor:pointer;transition:.25s;font-size:15px}
-    button:hover,button.active{background:#007bff;border-color:#007bff}
-    model-viewer{width:92%;max-width:800px;height:420px;border-radius:16px;background:#121212;box-shadow:0 0 20px rgba(0,0,0,.5)}
-    .ar-button{background:#007bff;color:#fff;border:none;border-radius:10px;padding:12px 20px;font-size:16px;cursor:pointer;margin-top:12px}
-    .hint{opacity:.75;font-size:14px;margin:14px 0 25px;line-height:1.4;max-width:90%}
-    @media (max-width:768px){model-viewer{height:360px}}
-    a#iosARLink{display:none} /* iOS için gizli Quick Look linki */
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0e0e0e;
+      color: #fff;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0 60px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .gallery {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .model-card {
+      position: relative;
+      width: 90%;
+      background: #151515;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    }
+
+    model-viewer {
+      width: 100%;
+      height: 400px;
+      background: #111;
+      border-radius: 20px;
+    }
+
+    .ar-btn {
+      position: absolute;
+      bottom: 15px;
+      right: 15px;
+      background: rgba(0,123,255,0.9);
+      border: none;
+      color: white;
+      font-size: 16px;
+      padding: 10px 14px;
+      border-radius: 50px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: 0.2s;
+    }
+
+    .ar-btn:hover {
+      background: #0063d1;
+    }
+
+    .ar-btn span {
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    @media (max-width: 768px) {
+      model-viewer { height: 340px; }
+    }
   </style>
 </head>
 <body>
-  <h1>Set-Chair 3D Model Görüntüleme</h1>
+  <h1>🪑 Set-Chair 3D AR Galeri</h1>
 
-  <div class="buttons">
-    <button onclick="show('Chair')" class="active">Chair</button>
-    <button onclick="show('Chair1')">Chair 1</button>
-    <button onclick="show('Chair2')">Chair 2</button>
-  </div>
-
-  <model-viewer id="viewer"
-    camera-controls
-    ar
-    ar-modes="scene-viewer quick-look webxr"
-    ar-scale="fixed"
-    interaction-prompt="none"
-    shadow-intensity="1"
-    crossorigin="anonymous"
-    alt="3D model">
-  </model-viewer>
+  <div class="gallery" id="gallery"></div>
 
   <!-- iOS Quick Look için gizli link -->
-  <a id="iosARLink" rel="ar" href=""></a>
-
-  <button class="ar-button" id="arBtn">🕶️ Evinde Gör</button>
-
-  <div class="hint">
-    Bilgisayarda modeli döndürebilirsiniz. Mobilde <b>Evinde Gör</b> butonuna tıklayarak AR moduna geçin.
-    <br><small>⚠️ Linki WhatsApp içinden değil, Safari/Chrome’da açın.</small>
-  </div>
+  <a id="iosARLink" rel="ar" href="" style="display:none;"></a>
 
   <script>
     const BASE = "https://cdn.jsdelivr.net/gh/kerimdmr/Set-Chair";
-    const MODELS = {
-      "Chair":  { glb:`${BASE}/Chair/Chair.glb`,  usdz:`${BASE}/Chair/Chair.usdz`,  poster:`${BASE}/Chair/Chair.jpg` },
-      "Chair1": { glb:`${BASE}/Chair1/Chair1.glb`, usdz:`${BASE}/Chair1/Chair1.usdz`, poster:`${BASE}/Chair1/Chair1.jpg` },
-      "Chair2": { glb:`${BASE}/Chair2/Chair2.glb`, usdz:`${BASE}/Chair2/Chair2.usdz`, poster:`${BASE}/Chair2/Chair2.jpg` }
-    };
+    const MODELS = [
+      { name: "Chair",  glb: `${BASE}/Chair/Chair.glb`,  usdz: `${BASE}/Chair/Chair.usdz` },
+      { name: "Chair1", glb: `${BASE}/Chair1/Chair1.glb`, usdz: `${BASE}/Chair1/Chair1.usdz` },
+      { name: "Chair2", glb: `${BASE}/Chair2/Chair2.glb`, usdz: `${BASE}/Chair2/Chair2.usdz` }
+    ];
 
-    const viewer = document.getElementById("viewer");
-    const arBtn  = document.getElementById("arBtn");
-    const iosAR  = document.getElementById("iosARLink");
-    const buttons= document.querySelectorAll(".buttons button");
+    const gallery = document.getElementById("gallery");
+    const iosAR = document.getElementById("iosARLink");
 
-    let currentKey = "Chair";
-
-    function isIOS(){
+    function isIOS() {
       return /iPhone|iPad|iPod/i.test(navigator.userAgent);
     }
 
-    function show(name){
-      currentKey = name;
-      const m = MODELS[name];
-      if(!m) return;
-      buttons.forEach(b => b.classList.remove("active"));
-      document.querySelector(`button[onclick="show('${name}')"]`).classList.add("active");
+    MODELS.forEach(model => {
+      const card = document.createElement("div");
+      card.className = "model-card";
 
-      viewer.poster = m.poster;
-      viewer.src    = m.glb;
-      viewer.setAttribute("ios-src", m.usdz);
+      const viewer = document.createElement("model-viewer");
+      viewer.setAttribute("src", model.glb);
+      viewer.setAttribute("ios-src", model.usdz);
+      viewer.setAttribute("camera-controls", "");
+      viewer.setAttribute("shadow-intensity", "1");
+      viewer.setAttribute("exposure", "1");
+      viewer.setAttribute("interaction-prompt", "none");
+      viewer.setAttribute("ar", "");
+      viewer.setAttribute("ar-scale", "fixed");
+      viewer.setAttribute("ar-modes", "scene-viewer quick-look webxr");
 
-      // iOS için Quick Look linkini hazırla
-      iosAR.href = m.usdz;
-    }
+      const btn = document.createElement("button");
+      btn.className = "ar-btn";
+      btn.innerHTML = '<span>🕶️</span> Evinde Gör';
+      btn.addEventListener("click", () => {
+        if (isIOS()) {
+          iosAR.href = model.usdz;
+          iosAR.click();
+        } else {
+          viewer.activateAR();
+        }
+      });
 
-    // AR butonu: iOS’ta gizli rel="ar" linkine tıkla; Android’de model-viewer AR
-    arBtn.addEventListener("click", () => {
-      if (isIOS()) {
-        iosAR.click();       // Quick Look
-      } else {
-        viewer.activateAR(); // Scene Viewer / WebXR
-      }
+      card.appendChild(viewer);
+      card.appendChild(btn);
+      gallery.appendChild(card);
     });
-
-    // İlk model
-    show("Chair");
   </script>
 </body>
 </html>
