@@ -21,22 +21,18 @@
       text-align: center;
       overflow-x: hidden;
     }
-
     h1 {
       margin-top: 18px;
       font-size: 22px;
       font-weight: 700;
-      letter-spacing: 0.4px;
       display: flex;
       align-items: center;
       gap: 8px;
     }
-
     h1::before {
       content: "🪑";
       font-size: 26px;
     }
-
     .buttons {
       display: flex;
       gap: 10px;
@@ -44,7 +40,6 @@
       justify-content: center;
       margin: 15px 0 20px;
     }
-
     button {
       background: #1a1a1a;
       border: 1px solid #333;
@@ -55,13 +50,11 @@
       transition: 0.25s;
       font-size: 15px;
     }
-
     button:hover,
     button.active {
       background: #007bff;
       border-color: #007bff;
     }
-
     model-viewer {
       width: 92%;
       max-width: 800px;
@@ -69,9 +62,7 @@
       border-radius: 16px;
       background: #121212;
       box-shadow: 0 0 20px rgba(0,0,0,0.5);
-      contain: layout paint;
     }
-
     .hint {
       opacity: 0.75;
       font-size: 14px;
@@ -79,7 +70,6 @@
       line-height: 1.4;
       max-width: 90%;
     }
-
     .ar-button {
       background: #007bff;
       color: white;
@@ -88,14 +78,12 @@
       padding: 12px 20px;
       font-size: 16px;
       cursor: pointer;
-      margin-top: 10px;
+      margin-top: 12px;
       transition: 0.2s;
     }
-
     .ar-button:hover {
       background: #0063d1;
     }
-
     @media (max-width: 768px) {
       model-viewer { height: 360px; }
       h1 { font-size: 20px; }
@@ -149,18 +137,13 @@
       document.querySelector(`button[onclick="show('${name}')"]`).classList.add("active");
 
       viewer.pause();
-      viewer.src = m.glb;
       viewer.poster = m.poster;
+      viewer.src = m.glb;
       viewer.setAttribute("ios-src", m.usdz);
       viewer.dismissPoster();
     }
 
-    // "Evinde Gör" butonu AR modunu tetikler
-    arBtn.addEventListener("click", () => {
-      viewer.activateAR();
-    });
-
-    // Sayfa açıldığında ilk model
+    arBtn.addEventListener("click", () => viewer.activateAR());
     show("Chair");
   </script>
 </body>
